@@ -1,5 +1,6 @@
 #include "header.h"
 #include <iostream>
+using namespace std;
 
 void displayBoards(char board1[][BOARD_SIZE], char board2[][BOARD_SIZE]) {
     // Implementation will go here

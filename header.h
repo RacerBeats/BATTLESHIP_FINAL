@@ -3,7 +3,9 @@
 
 #include <vector>
 #include <string>
+using namespace std;
 
+// Constants
 const int BOARD_SIZE = 10;
 const int FLEET_SIZE = 5;
 
@@ -20,10 +22,10 @@ struct Point {
 };
 
 struct Ship {
-    std::string name;
+    string name;
     int size;
     int hitCount;
-    std::vector<Point> positions;
+    vector<Point> positions;
 };
 
 struct PlayerBoard {
