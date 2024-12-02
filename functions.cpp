@@ -108,10 +108,59 @@ void placeShip(PlayerBoard &playerBoard, int shipIndex) {
 }
 
 void getValidShipInfo(int &row, int &col, char &orientation, PlayerBoard &playerBoard, int shipIndex) {
-    // Implementation will go here
+    Ship &ship = playerBoard.fleet[shipIndex];
+    bool validInput = false;
+
+    while (!validInput) {
+        string input;
+        cout << "Enter the starting coordinates of your " << ship.name << " (e.g., A1): ";
+        cin >> input;
+
+        // Convert input to row and column
+        if (input.length() >= 2) {
+            row = toupper(input[0]) - 'A'; // Convert letter to row index
+            col = stoi(input.substr(1)) - 1; // Convert number to column index (0-based)
+
+            // Check if the input is valid
+            if (row >= 0 && row < BOARD_SIZE && col >= 0 && col < BOARD_SIZE) {
+                cout << "Enter the orientation of your " << ship.name << " (horizontal(h) or vertical(v)): ";
+                cin >> orientation;
+
+                // Validate orientation
+                if (orientation == 'h' || orientation == 'v') {
+                    // Check if the ship can be placed in the specified location
+                    if (spaceOccupied(playerBoard, row, col, orientation, ship.size)) {
+                        cout << "Error: Space already occupied. Please try again." << endl;
+                    } else {
+                        validInput = true; // Valid input received
+                    }
+                } else {
+                    cout << "Error: Invalid orientation. Please enter 'h' or 'v'." << endl;
+                }
+            } else {
+                cout << "Error: Invalid coordinates. Please enter values within the board range." << endl;
+            }
+        } else {
+            cout << "Error: Invalid input format. Please enter coordinates in the format A1." << endl;
+        }
+    }
 }
 
 bool spaceOccupied(const PlayerBoard &playerBoard, int row, int col, char orientation, int shipSize) {
-    // Implementation will go here
+    if (orientation == 'h') {
+        // Check horizontal placement
+        for (int i = 0; i < shipSize; i++) {
+            if (col + i >= BOARD_SIZE || playerBoard.board[row][col + i] != ' ') {
+                return true; // Space is occupied or out of bounds
+            }
+        }
+    } else if (orientation == 'v') {
+        // Check vertical placement
+        for (int i = 0; i < shipSize; i++) {
+            if (row + i >= BOARD_SIZE || playerBoard.board[row + i][col] != ' ') {
+                return true; // Space is occupied or out of bounds
+            }
+        }
+    }
     return false;
 }
