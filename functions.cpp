@@ -106,13 +106,8 @@ void placeShip(PlayerBoard &playerBoard, int shipIndex) {
     int col; // Column index (0-9)
     char orientation; // 'h' for horizontal, 'v' for vertical
 
-    // For demonstration, let's assume these values are provided
-    cout << "Enter the starting coordinates of your " << ship.name << ": ";
-    cin >> row >> col; // Assuming input is in the format A1, B2, etc.
-    cout << "Enter the orientation of your " << ship.name << " (horizontal(h) or vertical(v)): ";
-    cin >> orientation;
-
-    //TODO: Validate input and handle errors
+    // get valid ship info
+    getValidShipInfo(row, col, orientation, playerBoard, shipIndex);
 
     // Place the ship on the board
     if (orientation == 'h') {
@@ -189,24 +184,31 @@ bool spaceOccupied(const PlayerBoard &playerBoard, int row, int col, char orient
 void playerTurn(PlayerBoard &player, PlayerBoard &computer) {
     int row, col;
     char letter;
-    cout << "Player's turn. Enter your shot (e.g., A 1): ";
-    cin >> letter >> col;
-    row = toupper(letter) - 'A'; // Convert letter to row index
-    col -= 1; // Convert number to column index (0-based)
+    bool validShot = false;
 
-    // Check if the shot is valid
-    if (row >= 0 && row < BOARD_SIZE && col >= 0 && col < BOARD_SIZE) {
-        if (computer.board[row][col] != ' ') {
-            cout << "Hit!" << endl;
-            computer.board[row][col] = 'H'; // Mark hit on the computer's board
-            // check what ship was hit, and increment hit count for that ship
-            computer.fleet->hitCount++;
+    while (!validShot) {
+        cout << "Player's turn. Enter your shot (e.g., A 1): ";
+        cin >> letter >> col;
+        row = toupper(letter) - 'A'; // Convert letter to row index
+        col -= 1; // Convert number to column index (0-based)
+
+        // Check if the shot is valid
+        if (row >= 0 && row < BOARD_SIZE && col >= 0 && col < BOARD_SIZE) {
+            if (computer.board[row][col] != 'H' && computer.board[row][col] != 'M') {
+                validShot = true; // Valid shot found
+                if (computer.board[row][col] != ' ') {
+                    cout << "Hit!" << endl;
+                    computer.board[row][col] = 'H'; // Mark hit on the computer's board
+                } else {
+                    cout << "Miss!" << endl;
+                    computer.board[row][col] = 'M'; // Mark miss on the computer's board
+                }
+            } else {
+                cout << "You have already shot at this location. Please try again." << endl;
+            }
         } else {
-            cout << "Miss!" << endl;
-            computer.board[row][col] = 'M'; // Mark miss on the computer's board
+            cout << "Invalid shot. Please try again." << endl;
         }
-    } else {
-        cout << "Invalid shot. Please try again." << endl;
     }
 
     displayBoards(player.board, computer.board); // Show boards after the turn
