@@ -1,24 +1,28 @@
 #include <iostream>
+#include <cstdlib>
+#include <ctime>
 #include "header.h"
 using namespace std;
 
 int main() {
-    PlayerBoard player1;
-    PlayerBoard player2;
+    // Seed the random number generator
+    srand(time(0));
 
-    // Initialize boards and fleets
-    initFleet(player1);
-    initFleet(player2);
+    PlayerBoard player, computer;
 
     // Setup boards
-    boardSetup(player1, player2);
+    boardSetup(player, computer);
 
-    // Game loop would go here
-    displayBoards(player1.board, player2.board);
-    initFleet(player1);
-    initFleet(player2);
-    placeShip(player1, 0);
-    placeShip(player2, 0);
+    // Game loop
+    while (!isGameOver(player, computer)) {
+        playerTurn(player, computer);
+        if (isGameOver(player, computer)) break;
+        computerTurn(computer, player);
+    }
+
+    cout << "Game Over!" << endl;
+    return 0;
+
 
     return 0;
 }
