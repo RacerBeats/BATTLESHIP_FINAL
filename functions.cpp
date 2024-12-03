@@ -30,7 +30,7 @@ void displayBoards(char board1[][BOARD_SIZE], char board2[][BOARD_SIZE]) {
         cout << row << " |"; // Row header
         for (int col = 0; col < BOARD_SIZE; col++) {
             // Check if the cell is empty and print accordingly
-            if (board1[row - 'A'][col] == '\0') {
+            if (board1[row - 'A'][col] == ' ') {
                 cout << "   |"; // Print empty space
             } else {
                 cout << " " << board1[row - 'A'][col] << " |"; // Print board1
@@ -39,7 +39,7 @@ void displayBoards(char board1[][BOARD_SIZE], char board2[][BOARD_SIZE]) {
         cout << "          " << row << " |"; // Row header for board2
         for (int col = 0; col < BOARD_SIZE; col++) {
             // Check if the cell is empty and print accordingly
-            if (board2[row - 'A'][col] == '\0') {
+            if (board2[row - 'A'][col] == ' ') {
                 cout << "   |"; // Print empty space
             } else {
                 cout << " " << board2[row - 'A'][col] << " |"; // Print board2
@@ -112,6 +112,8 @@ void placeShip(PlayerBoard &playerBoard, int shipIndex) {
     cout << "Enter the orientation of your " << ship.name << " (horizontal(h) or vertical(v)): ";
     cin >> orientation;
 
+    //TODO: Validate input and handle errors
+
     // Place the ship on the board
     if (orientation == 'h') {
         for (int i = 0; i < ship.size; i++) {
@@ -133,6 +135,8 @@ void getValidShipInfo(int &row, int &col, char &orientation, PlayerBoard &player
     while (!validInput) {
         char letter;
         int number;
+
+        //TODO: Add error handling for invalid input
         cout << "Enter the starting coordinates of your " << ship.name << " (e.g., A 1): ";
         cin >> letter >> number;
 
@@ -195,6 +199,8 @@ void playerTurn(PlayerBoard &player, PlayerBoard &computer) {
         if (computer.board[row][col] != ' ') {
             cout << "Hit!" << endl;
             computer.board[row][col] = 'H'; // Mark hit on the computer's board
+            // check what ship was hit, and increment hit count for that ship
+            computer.fleet->hitCount++;
         } else {
             cout << "Miss!" << endl;
             computer.board[row][col] = 'M'; // Mark miss on the computer's board
@@ -211,6 +217,7 @@ void computerTurn(PlayerBoard &computer, PlayerBoard &player) {
     int row, col;
     bool validShot = false;
 
+    // TODO: computer must run out of valid shots. infinite loop is making computer shoot forever
     while (!validShot) {
         row = rand() % BOARD_SIZE; // Random row
         col = rand() % BOARD_SIZE; // Random column
@@ -221,6 +228,8 @@ void computerTurn(PlayerBoard &computer, PlayerBoard &player) {
             if (player.board[row][col] != ' ') {
                 cout << "Computer hit at " << static_cast<char>('A' + row) << " " << (col + 1) << "!" << endl;
                 player.board[row][col] = 'H'; // Mark hit on the player's board
+                /// check what ship was hit, and increment hit count for that ship
+                player.fleet->hitCount++;
             } else {
                 cout << "Computer missed at " << static_cast<char>('A' + row) << " " << (col + 1) << "!" << endl;
                 player.board[row][col] = 'M'; // Mark miss on the player's board

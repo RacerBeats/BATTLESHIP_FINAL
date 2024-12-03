@@ -22,7 +22,4 @@ int main() {
 
     cout << "Game Over!" << endl;
     return 0;
-
-
-    return 0;
 }
