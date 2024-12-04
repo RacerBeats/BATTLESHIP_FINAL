@@ -198,7 +198,24 @@ void playerTurn(PlayerBoard &player, PlayerBoard &computer) {
                 validShot = true; // Valid shot found
                 if (computer.board[row][col] != ' ') {
                     cout << "Hit!" << endl;
+                    char shipSymbol = computer.board[row][col]; // get symbol of ship
                     computer.board[row][col] = 'H'; // Mark hit on the computer's board
+                    
+                    // Update hit count for the corresponding ship
+                    for (int i = 0; i < FLEET_SIZE; i++) {
+                        // Check if the hit position matches any ship's position
+                        for (int j = 0; j < computer.fleet[i].positions.size(); j++) {
+                            if (computer.fleet[i].positions[j].row == row && computer.fleet[i].positions[j].col == col) {
+                                computer.fleet[i].hitCount++;
+                                // Check if the ship is sunk
+                                if (computer.fleet[i].hitCount >= computer.fleet[i].size) {
+                                    cout << "You sunk the " << computer.fleet[i].name << "!" << endl;
+                                }
+                                break; // Break out of the inner loop once the ship is found
+                            }
+                        }
+                    }
+
                 } else {
                     cout << "Miss!" << endl;
                     computer.board[row][col] = 'M'; // Mark miss on the computer's board
@@ -219,7 +236,6 @@ void computerTurn(PlayerBoard &computer, PlayerBoard &player) {
     int row, col;
     bool validShot = false;
 
-    // TODO: computer must run out of valid shots. infinite loop is making computer shoot forever
     while (!validShot) {
         row = rand() % BOARD_SIZE; // Random row
         col = rand() % BOARD_SIZE; // Random column
@@ -229,9 +245,23 @@ void computerTurn(PlayerBoard &computer, PlayerBoard &player) {
             validShot = true; // Valid shot found
             if (player.board[row][col] != ' ') {
                 cout << "Computer hit at " << static_cast<char>('A' + row) << " " << (col + 1) << "!" << endl;
+                char shipSymbol = player.board[row][col]; // Get the symbol of the ship hit
                 player.board[row][col] = 'H'; // Mark hit on the player's board
-                /// check what ship was hit, and increment hit count for that ship
-                player.fleet->hitCount++;
+                
+                 // Update hit count for the corresponding ship
+                for (int i = 0; i < FLEET_SIZE; i++) {
+                    // Check if the hit position matches any ship's position
+                    for (int j = 0; j < player.fleet[i].positions.size(); j++) {
+                        if (player.fleet[i].positions[j].row == row && player.fleet[i].positions[j].col == col) {
+                            player.fleet[i].hitCount++;
+                            // Check if the ship is sunk
+                            if (player.fleet[i].hitCount >= player.fleet[i].size) {
+                                cout << "The computer sunk your " << player.fleet[i].name << "!" << endl;
+                            }
+                            break; // Break out of the inner loop once the ship is found
+                        }
+                    }
+                }
             } else {
                 cout << "Computer missed at " << static_cast<char>('A' + row) << " " << (col + 1) << "!" << endl;
                 player.board[row][col] = 'M'; // Mark miss on the player's board
@@ -244,10 +274,22 @@ void computerTurn(PlayerBoard &computer, PlayerBoard &player) {
 
 bool isGameOver(const PlayerBoard &player, const PlayerBoard &computer) {
     // Check if all ships are sunk for the computer
-    bool computerShipsSunk = areAllShipsSunk(computer);
+    bool computerShipsSunk = true;
+    for (int i = 0; i < FLEET_SIZE; i++) {
+        if (computer.fleet[i].hitCount < computer.fleet[i].size) {
+            computerShipsSunk = false; // At least one ship is still afloat
+            break;
+        }
+    }
 
     // Check if all ships are sunk for the player
-    bool playerShipsSunk = areAllShipsSunk(player);
+    bool playerShipsSunk = true;
+    for (int i = 0; i < FLEET_SIZE; i++) {
+        if (player.fleet[i].hitCount < player.fleet[i].size) {
+            playerShipsSunk = false; // At least one ship is still afloat
+            break;
+        }
+    }
 
     // Determine the game state
     if (computerShipsSunk) {
@@ -259,22 +301,4 @@ bool isGameOver(const PlayerBoard &player, const PlayerBoard &computer) {
     }
 
     return false; // Game continues
-}
-
-bool areAllShipsSunk(const PlayerBoard &player) {
-    // Assume all ships are sunk initially
-    bool allSunk = true;
-
-    // Loop through each ship in the player's fleet
-    for (int i = 0; i < FLEET_SIZE; i++) {
-        Ship currentShip = player.fleet[i]; // Get the current ship
-
-        // Check if the ship is still afloat
-        if (currentShip.hitCount < currentShip.size) {
-            allSunk = false; // At least one ship is still afloat
-            break; // No need to check further, we found a ship that is not sunk
-        }
-    }
-
-    return allSunk; // Return whether all ships are sunk
 }
