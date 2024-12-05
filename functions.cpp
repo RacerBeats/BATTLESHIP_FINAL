@@ -189,6 +189,15 @@ void playerTurn(PlayerBoard &player, PlayerBoard &computer) {
     while (!validShot) {
         cout << "Player's turn. Enter your shot (e.g., A 1): ";
         cin >> letter >> col;
+
+        //emergency fix: if input fails, clear error and ignore
+        if (cin.fail()) {
+            cin.clear();
+            cin.ignore(999999999999999999, '\n');
+            cout << "Invalid input. Please enter a valid shot (e.g., A 1)." << endl;
+            continue;
+        }
+
         row = toupper(letter) - 'A'; // Convert letter to row index
         col -= 1; // Convert number to column index (0-based)
 
@@ -231,44 +240,109 @@ void playerTurn(PlayerBoard &player, PlayerBoard &computer) {
     displayBoards(player.board, computer.board); // Show boards after the turn
 }
 
-//computer shoots randomly
+/**
+ * Implements the computer's turn in a game of Battleship.
+ * The computer can operate in two modes: "Hunt" mode to randomly select a target,
+ * and "Target" mode to systematically target the surrounding cells of a hit.
+ * The function updates the player's board and displays the results of the computer's turn.
+ *
+ * @param computer The computer's PlayerBoard object.
+ * @param player The player's PlayerBoard object.
+ */
+// Modify the computerTurn function
 void computerTurn(PlayerBoard &computer, PlayerBoard &player) {
+    static bool inTargetMode = false; // Track if we are in target mode
+    static vector<Point> targetStack; // Vector for potential targets
     int row, col;
-    bool validShot = false;
 
-    while (!validShot) {
-        row = rand() % BOARD_SIZE; // Random row
-        col = rand() % BOARD_SIZE; // Random column
+    if (!inTargetMode) {
+        // Hunt mode: Randomly select a target
+        do {
+            row = rand() % BOARD_SIZE; // Random row
+            col = rand() % BOARD_SIZE; // Random column
+        } while (player.board[row][col] == 'H' || player.board[row][col] == 'M'); // Ensure it's a valid shot
 
-        // Check if the shot is valid (not already hit or missed)
-        if (player.board[row][col] != 'H' && player.board[row][col] != 'M') {
-            validShot = true; // Valid shot found
-            if (player.board[row][col] != ' ') {
-                cout << "Computer hit at " << static_cast<char>('A' + row) << " " << (col + 1) << "!" << endl;
-                char shipSymbol = player.board[row][col]; // Get the symbol of the ship hit
-                player.board[row][col] = 'H'; // Mark hit on the player's board
-                
-                 // Update hit count for the corresponding ship
-                for (int i = 0; i < FLEET_SIZE; i++) {
-                    // Check if the hit position matches any ship's position
-                    for (int j = 0; j < player.fleet[i].positions.size(); j++) {
-                        if (player.fleet[i].positions[j].row == row && player.fleet[i].positions[j].col == col) {
-                            player.fleet[i].hitCount++;
-                            // Check if the ship is sunk
-                            if (player.fleet[i].hitCount >= player.fleet[i].size) {
-                                cout << "The computer sunk your " << player.fleet[i].name << "!" << endl;
-                            }
-                            break; // Break out of the inner loop once the ship is found
+        // Check if the shot is valid
+        if (player.board[row][col] != ' ') {
+            cout << "Computer hit at " << static_cast<char>('A' + row) << " " << (col + 1) << "!" << endl;
+            player.board[row][col] = 'H'; // Mark hit on the player's board
+            inTargetMode = true; // Switch to target mode
+
+            // Add surrounding cells to the target vector
+            if (row > 0) targetStack.push_back({row - 1, col}); // Up
+            if (row < BOARD_SIZE - 1) targetStack.push_back({row + 1, col}); // Down
+            if (col > 0) targetStack.push_back({row, col - 1}); // Left
+            if (col < BOARD_SIZE - 1) targetStack.push_back({row, col + 1}); // Right
+
+            // Update hit count for the corresponding ship
+            for (int i = 0; i < FLEET_SIZE; i++) {
+                for (const auto &pos : player.fleet[i].positions) {
+                    if (pos.row == row && pos.col == col) {
+                        player.fleet[i].hitCount++;
+                        if (player.fleet[i].hitCount >= player.fleet[i].size) {
+                            cout << "The computer sunk your " << player.fleet[i].name << "!" << endl;
                         }
+                        break;
                     }
                 }
-            } else {
-                cout << "Computer missed at " << static_cast<char>('A' + row) << " " << (col + 1) << "!" << endl;
-                player.board[row][col] = 'M'; // Mark miss on the player's board
             }
+        } 
+
+        // computer missed, keep going
+        else {
+            cout << "Computer missed at " << static_cast<char>('A' + row) << " " << (col + 1) << "!" << endl;
+            player.board[row][col] = 'M'; // Mark miss on the player's board
+        }
+    } 
+    else if (inTargetMode || !targetStack.empty()) {
+        cout << "Computer is targeting..." << endl;
+        bool validShotTaken = false;
+        
+        // Try targets until we get a valid shot
+        while (!targetStack.empty() && !validShotTaken) {
+            Point target = targetStack.back();
+            targetStack.pop_back();
+            row = target.row;
+            col = target.col;
+
+            // If this target is valid, take the shot
+            if (player.board[row][col] != 'H' && player.board[row][col] != 'M') {
+                validShotTaken = true;  // Will exit loop after this shot
+                if (player.board[row][col] != ' ') {
+                    // Hit logic - keep existing code for hit processing
+                    cout << "Computer hit at " << static_cast<char>('A' + row) << " " << (col + 1) << "!" << endl;
+                    player.board[row][col] = 'H';
+                    
+                    // Add surrounding targets - keep existing code
+                    if (row > 0) targetStack.push_back({row - 1, col});
+                    if (row < BOARD_SIZE - 1) targetStack.push_back({row + 1, col});
+                    if (col > 0) targetStack.push_back({row, col - 1});
+                    if (col < BOARD_SIZE - 1) targetStack.push_back({row, col + 1});
+                    
+                    // Keep existing hit count and ship sinking logic
+                    for (int i = 0; i < FLEET_SIZE; i++) {
+                        for (const auto &pos : player.fleet[i].positions) {
+                            if (pos.row == row && pos.col == col) {
+                                player.fleet[i].hitCount++;
+                                if (player.fleet[i].hitCount >= player.fleet[i].size) {
+                                    cout << "The computer sunk your " << player.fleet[i].name << "!" << endl;
+                                }   
+                            }
+                        }
+                    }
+                } else {
+                    cout << "Computer missed at " << static_cast<char>('A' + row) << " " << (col + 1) << "!" << endl;
+                    player.board[row][col] = 'M';
+                }
+            }
+            // If invalid, loop will continue to next target
+        }
+        
+        // If no valid shots were possible, return to hunt mode
+        if (!validShotTaken) {
+            inTargetMode = false;
         }
     }
-
     displayBoards(player.board, computer.board); // Show boards after the turn
 }
 
