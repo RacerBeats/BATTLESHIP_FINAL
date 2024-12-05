@@ -3,6 +3,14 @@
 #include <iomanip>
 using namespace std;
 
+/**
+ * Displays the game boards for both players in a Battleship game.
+ * The function prints the column headers, row headers, and the contents of each cell
+ * for both player boards, with a space between the two boards.
+ *
+ * @param board1 The game board for the first player.
+ * @param board2 The game board for the second player.
+ */
 void displayBoards(char board1[][BOARD_SIZE], char board2[][BOARD_SIZE]) {
     // Print column headers
     cout << " ";
@@ -29,7 +37,7 @@ void displayBoards(char board1[][BOARD_SIZE], char board2[][BOARD_SIZE]) {
     for (char row = 'A'; row < 'A' + BOARD_SIZE; row++) {
         cout << row << " |"; // Row header
         for (int col = 0; col < BOARD_SIZE; col++) {
-            // Check if the cell is empty and print accordingly
+            // Show everything on player's board (board1)
             if (board1[row - 'A'][col] == ' ') {
                 cout << "   |"; // Print empty space
             } else {
@@ -38,11 +46,11 @@ void displayBoards(char board1[][BOARD_SIZE], char board2[][BOARD_SIZE]) {
         }
         cout << "          " << row << " |"; // Row header for board2
         for (int col = 0; col < BOARD_SIZE; col++) {
-            // Check if the cell is empty and print accordingly
-            if (board2[row - 'A'][col] == ' ') {
-                cout << "   |"; // Print empty space
+            // Only show hits and misses on opponent's board (board2)
+            if (board2[row - 'A'][col] == 'H' || board2[row - 'A'][col] == 'M') {
+                cout << " " << board2[row - 'A'][col] << " |";
             } else {
-                cout << " " << board2[row - 'A'][col] << " |"; // Print board2
+                cout << "   |"; // Hide ships, show empty space
             }
         }
         cout << endl;
@@ -58,7 +66,15 @@ void displayBoards(char board1[][BOARD_SIZE], char board2[][BOARD_SIZE]) {
         cout << endl;
     }
 }
-
+/**
+ * Initializes the player's fleet of ships on the game board.
+ *
+ * This function sets up the player's game board by:
+ * 1. Initializing the board to empty spaces.
+ * 2. Defining the ships in the player's fleet with their names, sizes, and position vectors.
+ *
+ * @param playerBoard Reference to the player's game board.
+ */
 void initFleet(PlayerBoard &playerBoard) {
     // Initialize the board to empty spaces
     for (int i = 0; i < BOARD_SIZE; i++) {
@@ -75,6 +91,18 @@ void initFleet(PlayerBoard &playerBoard) {
     playerBoard.fleet[4] = {"Destroyer", 2, 0, {}};
 }
 
+/**
+ * Sets up the game boards for both players by initializing their fleets and placing their ships.
+ *
+ * This function performs the following steps:
+ * 1. Initializes the fleets for both player1 and player2 using the `initFleet` function.
+ * 2. Prompts player1 to set their board by placing their ships using the `placeShip` function.
+ * 3. Prompts player2 to set their board by placing their ships using the `placeShip` function.
+ * 4. Displays the final boards for both players after the setup is complete.
+ *
+ * @param player1 Reference to the first player's game board.
+ * @param player2 Reference to the second player's game board.
+ */
 void boardSetup(PlayerBoard &player1, PlayerBoard &player2) {
     // Initialize the fleets for both players
     initFleet(player1);
@@ -98,6 +126,73 @@ void boardSetup(PlayerBoard &player1, PlayerBoard &player2) {
     displayBoards(player1.board, player2.board);
 }
 
+/**
+ * Sets up the game boards for a player vs. computer game by initializing the player's and computer's fleets and placing their ships.
+ *
+ * This function performs the following steps:
+ * 1. Initializes the fleets for both the player and the computer using the `initFleet` function.
+ * 2. Prompts the player to set their board by placing their ships using the `placeShip` function.
+ * 3. Randomly places the computer's ships on its board.
+ * 4. Displays the final boards for both the player and the computer after the setup is complete.
+ *
+ * @param player1 Reference to the player's game board.
+ * @param computer Reference to the computer's game board.
+ */
+void boardSetupPVE(PlayerBoard &player1, PlayerBoard &computer) {
+    // Initialize the fleets for both players
+    initFleet(player1);
+    initFleet(computer);
+
+    // Place ships for player 1
+    cout << "Player 1, set your board." << endl;
+    for (int i = 0; i < FLEET_SIZE; i++) {
+        displayBoards(player1.board, computer.board); // Display boards before placing the ship
+        placeShip(player1, i); // Place each ship in the player's fleet
+    }
+
+    // Place ships randomly for computer
+    cout << "Computer setting up board..." << endl;
+    for (int i = 0; i < FLEET_SIZE; i++) {
+        bool placed = false;
+        while (!placed) {
+            int row = rand() % BOARD_SIZE;
+            int col = rand() % BOARD_SIZE;
+            char orientation = (rand() % 2) ? 'h' : 'v';
+            
+            if (!spaceOccupied(computer, row, col, orientation, computer.fleet[i].size)) {
+                // Place the ship
+                if (orientation == 'h') {
+                    for (int j = 0; j < computer.fleet[i].size; j++) {
+                        computer.board[row][col + j] = computer.fleet[i].name[0];
+                        computer.fleet[i].positions.push_back({row, col + j});
+                    }
+                } else {
+                    for (int j = 0; j < computer.fleet[i].size; j++) {
+                        computer.board[row + j][col] = computer.fleet[i].name[0];
+                        computer.fleet[i].positions.push_back({row + j, col});
+                    }
+                }
+                placed = true;
+            }
+        }
+    }
+
+    // Final display of both boards after setup
+    displayBoards(player1.board, computer.board);
+}
+
+/**
+ * Places a ship on the player's game board.
+ *
+ * This function performs the following steps:
+ * 1. Retrieves the ship information from the player's fleet using the provided `shipIndex`.
+ * 2. Prompts the player to enter valid starting coordinates and orientation for the ship using the `getValidShipInfo` function.
+ * 3. Places the ship on the player's game board based on the provided coordinates and orientation.
+ * 4. Stores the positions of the ship on the board in the `positions` vector of the `Ship` struct.
+ *
+ * @param playerBoard Reference to the player's game board.
+ * @param shipIndex Index of the ship in the player's fleet to be placed.
+ */
 void placeShip(PlayerBoard &playerBoard, int shipIndex) {
     Ship &ship = playerBoard.fleet[shipIndex];
 
@@ -123,6 +218,19 @@ void placeShip(PlayerBoard &playerBoard, int shipIndex) {
     }
 }
 
+/**
+ * Prompts the player to enter valid starting coordinates and orientation for a ship, and places the ship on the player's game board.
+ *
+ * This function performs the following steps:
+ * 1. Retrieves the ship information from the player's fleet using the provided `shipIndex`.
+ * 2. Prompts the player to enter valid starting coordinates and orientation for the ship.
+ * 3. Validates the input and checks if the specified location is available on the board.
+ * 4. Places the ship on the player's game board based on the provided coordinates and orientation.
+ * 5. Stores the positions of the ship on the board in the `positions` vector of the `Ship` struct.
+ *
+ * @param playerBoard Reference to the player's game board.
+ * @param shipIndex Index of the ship in the player's fleet to be placed.
+ */
 void getValidShipInfo(int &row, int &col, char &orientation, PlayerBoard &playerBoard, int shipIndex) {
     Ship &ship = playerBoard.fleet[shipIndex];
     bool validInput = false;
@@ -162,6 +270,16 @@ void getValidShipInfo(int &row, int &col, char &orientation, PlayerBoard &player
     }
 }
 
+/**
+ * Checks if the specified space on the player's game board is already occupied by a ship.
+ *
+ * @param playerBoard Reference to the player's game board.
+ * @param row The row index of the space to check.
+ * @param col The column index of the space to check.
+ * @param orientation The orientation of the ship being placed ('h' for horizontal, 'v' for vertical).
+ * @param shipSize The size of the ship being placed.
+ * @return True if the space is occupied, false otherwise.
+ */
 bool spaceOccupied(const PlayerBoard &playerBoard, int row, int col, char orientation, int shipSize) {
     if (orientation == 'h') {
         // Check horizontal placement
@@ -181,6 +299,15 @@ bool spaceOccupied(const PlayerBoard &playerBoard, int row, int col, char orient
     return false;
 }
 
+/**
+ * Handles the player's turn in the Battleship game.
+ * The function prompts the player to enter a shot, validates the input, and updates the computer's board accordingly.
+ * It also checks if the shot hits or misses a ship, and updates the hit count for the corresponding ship.
+ * Finally, it displays the updated boards after the turn.
+ *
+ * @param player The player's PlayerBoard object.
+ * @param computer The computer's PlayerBoard object.
+ */
 void playerTurn(PlayerBoard &player, PlayerBoard &computer) {
     int row, col;
     char letter;
@@ -249,7 +376,6 @@ void playerTurn(PlayerBoard &player, PlayerBoard &computer) {
  * @param computer The computer's PlayerBoard object.
  * @param player The player's PlayerBoard object.
  */
-// Modify the computerTurn function
 void computerTurn(PlayerBoard &computer, PlayerBoard &player) {
     static bool inTargetMode = false; // Track if we are in target mode
     static vector<Point> targetStack; // Vector for potential targets
@@ -346,6 +472,13 @@ void computerTurn(PlayerBoard &computer, PlayerBoard &player) {
     displayBoards(player.board, computer.board); // Show boards after the turn
 }
 
+/**
+ * Checks if the game is over by determining if all ships for either the player or the computer have been sunk.
+ *
+ * @param player The player's board.
+ * @param computer The computer's board.
+ * @return `true` if the game is over, `false` otherwise.
+ */
 bool isGameOver(const PlayerBoard &player, const PlayerBoard &computer) {
     // Check if all ships are sunk for the computer
     bool computerShipsSunk = true;

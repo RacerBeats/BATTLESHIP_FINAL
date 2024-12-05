@@ -43,5 +43,6 @@ bool spaceOccupied(const PlayerBoard &playerBoard, int row, int col, char orient
 void playerTurn(PlayerBoard &player, PlayerBoard &computer);
 void computerTurn(PlayerBoard &computer, PlayerBoard &player);
 bool isGameOver(const PlayerBoard &player, const PlayerBoard &computer);
+void boardSetupPVE(PlayerBoard &player1, PlayerBoard &computer);
 
 #endif // BATTLESHIP_HEADER_H
