@@ -1,10 +1,28 @@
 #include "header.h"
 #include <iostream>
 #include <iomanip>
+#include <fstream>
+#include <sstream>
 using namespace std;
 
-//TODO: INTRODUCE INPUT.TXT FOR DIFFERENT TESTS IN A QUICK WAY
-//TODO: SWAP PLAYER 1 AND PLAYER 2 BOARD TO HIDE AND SHOW.
+ifstream& getInputFile() {
+    static string filename;
+    static ifstream inputFile;
+    
+    if (!inputFile.is_open()) {
+        cout << "Enter input file name: ";
+        cin >> filename;
+        inputFile.open(filename);
+        
+        if (!inputFile.is_open()) {
+            cout << "Error: Could not open " << filename << endl;
+            exit(1);
+        }
+    }
+    return inputFile;
+}
+
+
 /**
  * Displays the game boards for both players in a Battleship game.
  * The function prints the column headers, row headers, and the contents of each cell
@@ -243,7 +261,9 @@ void getValidShipInfo(int &row, int &col, char &orientation, PlayerBoard &player
 
         //TODO: Add error handling for invalid input
         cout << "Enter the starting coordinates of your " << ship.name << " (e.g., A 1): ";
-        cin >> letter >> number;
+        getInputFile() >> letter; 
+        getInputFile()>> number;
+        cout << letter << " " << col << endl; // Echo input
 
         // Convert letter to row index and number to column index
         row = toupper(letter) - 'A'; // Convert letter to row index
@@ -252,8 +272,8 @@ void getValidShipInfo(int &row, int &col, char &orientation, PlayerBoard &player
         // Check if the input is valid
         if (row >= 0 && row < BOARD_SIZE && col >= 0 && col < BOARD_SIZE) {
             cout << "Enter the orientation of your " << ship.name << " (horizontal(h) or vertical(v)): ";
-            cin >> orientation;
-            cout << endl;
+            getInputFile() >> orientation;
+            cout << orientation << endl; // Echo input
 
             // Validate orientation
             if (orientation == 'h' || orientation == 'v') {
@@ -317,7 +337,9 @@ void playerTurn(PlayerBoard &player, PlayerBoard &computer) {
 
     while (!validShot) {
         cout << "Player's turn. Enter your shot (e.g., A 1): ";
-        cin >> letter >> col;
+        getInputFile() >> letter; 
+        getInputFile() >> col;
+        cout << letter << " " << col << endl; // Echo input
 
         //emergency fix: if input fails, clear error and ignore
         if (cin.fail()) {

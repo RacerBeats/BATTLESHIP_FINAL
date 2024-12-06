@@ -44,5 +44,6 @@ void playerTurn(PlayerBoard &player, PlayerBoard &computer);
 void computerTurn(PlayerBoard &computer, PlayerBoard &player);
 bool isGameOver(const PlayerBoard &player, const PlayerBoard &computer);
 void boardSetupPVE(PlayerBoard &player1, PlayerBoard &computer);
+ifstream& getInputFile();
 
 #endif // BATTLESHIP_HEADER_H

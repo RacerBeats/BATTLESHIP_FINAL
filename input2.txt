@@ -1,16 +1,13 @@
-#test 2: losing vs computer
-#set up player board with a little more intentionality
 A 1
 h
 B 1
 h
 F 1
-V
+v
 F 2
 v
 I 10
 v
-#Let the computer win, player shoots aimlessly
 A 1
 A 2
 A 3
