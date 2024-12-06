@@ -35,7 +35,7 @@ int main() {
         while (!isGameOver(player, player2)) {
             playerTurn(player, player2);
             if (isGameOver(player, player2)) break;
-            computerTurn(computer, player2);
+            playerTurn(player2, player);
         }
         
     } else {

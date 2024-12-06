@@ -3,6 +3,8 @@
 #include <iomanip>
 using namespace std;
 
+//TODO: INTRODUCE INPUT.TXT FOR DIFFERENT TESTS IN A QUICK WAY
+//TODO: SWAP PLAYER 1 AND PLAYER 2 BOARD TO HIDE AND SHOW.
 /**
  * Displays the game boards for both players in a Battleship game.
  * The function prints the column headers, row headers, and the contents of each cell
@@ -469,7 +471,7 @@ void computerTurn(PlayerBoard &computer, PlayerBoard &player) {
             inTargetMode = false;
         }
     }
-    displayBoards(player.board, computer.board); // Show boards after the turn
+    displayBoards(computer.board, player.board); // Show boards after the turn
 }
 
 /**
