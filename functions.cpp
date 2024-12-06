@@ -502,10 +502,10 @@ bool isGameOver(const PlayerBoard &player, const PlayerBoard &computer) {
 
     // Determine the game state
     if (computerShipsSunk) {
-        cout << "Player wins!" << endl;
+        cout << "Player 1 wins!" << endl;
         return true; // All computer ships are sunk
     } else if (playerShipsSunk) {
-        cout << "Computer wins!" << endl;
+        cout << "Player 1 looses!" << endl;
         return true; // All player ships are sunk
     }
 

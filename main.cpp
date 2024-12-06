@@ -5,8 +5,8 @@
 using namespace std;
 
 int main() {
-    // Seed the random number generator
-    srand(time(0));
+    // Seed the random number generator, fixed for reproducibility
+    srand(100);
 
     PlayerBoard player, player2, computer;
 

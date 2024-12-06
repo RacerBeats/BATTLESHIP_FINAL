@@ -1,0 +1,68 @@
+#test3: player 1 vs player 2, and some error handling
+#player 1 setup board
+#introduce error, out of bounds
+a 0
+
+#proceed normal
+a 1
+h
+#introduce error, occupied space
+a 1
+h
+b 1
+h
+c 1
+h
+d 1
+h
+e 1
+h
+
+#player 2 setup board
+f 1
+h
+g 1
+h
+h 1
+h
+i 1
+h
+j 1
+h
+
+#player 1 turn
+a 1
+#player 2 turn
+a 1
+#player 1 turn, space already hit
+a 1
+#proceed like normal
+a 2
+a 2
+a 3
+a 3
+a 4
+a 4
+a 5
+a 5
+b 1
+b 1
+b 2
+b 2
+b 3
+b 3
+b 4
+b 4
+c 1
+c 1
+c 2
+c 2
+c 3
+d 1
+d 2
+d 3
+e 1
+e 1
+e 2
+e 2
+#Player 2 wins

@@ -1,0 +1,30 @@
+#test 1: winning vs computer
+#setting up player board, all ships on upper left corner
+A 1
+h
+B 1
+h
+C 1
+h
+D 1
+h
+E 1
+h
+#This is a seeded run: just sink the computer ship.
+a 2
+a 3
+a 4
+a 5
+a 6
+b 1
+c 1
+d 1
+f 1
+f 2
+f 3
+e 7
+e 8
+e 9
+e 10
+h 8
+i 8
