@@ -283,7 +283,7 @@ void placeShip(PlayerBoard &playerBoard, int shipIndex)
     {
         for (int i = 0; i < ship.size; i++)
         {
-            playerBoard.board[row][col + i] = ship.name[0]; // Place the ship using the first letter of its name
+            playerBoard.board[row][col + i] = ship.name[0]; // Place the ship based off array of ships
             ship.positions.push_back({row, col + i}); // Store the position
         }
     } 
@@ -291,7 +291,7 @@ void placeShip(PlayerBoard &playerBoard, int shipIndex)
     {
         for (int i = 0; i < ship.size; i++) 
         {
-            playerBoard.board[row + i][col] = ship.name[0]; // Place the ship using the first letter of its name
+            playerBoard.board[row + i][col] = ship.name[0]; // Place the ship based off array of ships
             ship.positions.push_back({row + i, col}); // Store the position
         }
     }
@@ -320,7 +320,6 @@ void getValidShipInfo(int &row, int &col, char &orientation, PlayerBoard &player
         char letter;
         int number;
 
-        //TODO: Add error handling for invalid input
         cout << "Enter the starting coordinates of your " << ship.name << " (e.g., A 1): ";
         getInputFile() >> letter; 
         getInputFile()>> number;
